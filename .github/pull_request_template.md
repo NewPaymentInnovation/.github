@@ -56,7 +56,7 @@ Describe automated tests added or updated.
 
 ### :clipboard: Checklist
 
-- [ ] Style Guide: The code follows the [style guide](https://newpayment.atlassian.net/wiki/x/gYB9B).
+- [ ] Style Guide: The code follows the [style guide](https://newpayment.atlassian.net/wiki/x/BQCNCQ).
 
 - [ ] Comments: On complex or unclear code segments for easier maintenance.
 
