@@ -33,4 +33,4 @@ Detail testing procedures and environments.
 - [ ] The changes are sufficiently covered by automated tests and don't cause existing tests to fail.
 - [ ] New warnings and errors aren't introduced by the changes.
 - [ ] Any code changes follow the [NPI code style guides](https://newpayment.atlassian.net/wiki/x/BQCNCQ).
-- [ ] The README and any related documentation has been updated.
+- [ ] The README and any related documentation has been updated as required.
