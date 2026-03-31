@@ -1,0 +1,29 @@
+meta {
+  name: List Runs - Filtered by Status
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/settlement/runs
+  body: none
+  auth: none
+}
+
+params:query {
+  status: FAILED
+  page: 1
+  limit: 10
+}
+
+tests {
+  test("Status code is 200", function() {
+    expect(res.status).to.equal(200);
+  });
+
+  test("All returned runs have FAILED status", function() {
+    res.body.data.forEach(function(run) {
+      expect(run.status).to.equal("FAILED");
+    });
+  });
+}

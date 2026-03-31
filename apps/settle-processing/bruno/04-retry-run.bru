@@ -1,0 +1,57 @@
+meta {
+  name: Retry Pipeline Run
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/settlement/runs/{{runId}}/retry
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "reason": "Manual retry via Bruno test"
+  }
+}
+
+script:post-response {
+  if (res.status === 200) {
+    bru.setVar("retryId", res.body.retryId);
+    console.log("Retry ID set:", res.body.retryId);
+    console.log("Prior Ref:", res.body.priorRef);
+    console.log("Attempt number:", res.body.attemptNumber);
+  }
+}
+
+tests {
+  test("Status code is 200", function() {
+    expect(res.status).to.equal(200);
+  });
+
+  test("Response has retryId", function() {
+    expect(res.body.retryId).to.be.a("string");
+    expect(res.body.retryId).to.have.lengthOf.above(0);
+  });
+
+  test("retryId differs from original batchId", function() {
+    expect(res.body.retryId).to.not.equal(bru.getVar("batchId"));
+  });
+
+  test("executionRef equals retryId (not batchId)", function() {
+    expect(res.body.executionRef).to.equal(res.body.retryId);
+  });
+
+  test("priorRef is the previous execution reference", function() {
+    expect(res.body.priorRef).to.be.a("string");
+  });
+
+  test("attemptNumber is at least 1", function() {
+    expect(res.body.attemptNumber).to.be.at.least(1);
+  });
+
+  test("status is RETRYING", function() {
+    expect(res.body.status).to.equal("RETRYING");
+  });
+}

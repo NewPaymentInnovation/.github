@@ -1,0 +1,38 @@
+meta {
+  name: List Pipeline Runs
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/settlement/runs
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 1
+  limit: 20
+}
+
+tests {
+  test("Status code is 200", function() {
+    expect(res.status).to.equal(200);
+  });
+
+  test("Response has data array", function() {
+    expect(res.body.data).to.be.an("array");
+  });
+
+  test("Response has total count", function() {
+    expect(res.body.total).to.be.a("number");
+  });
+
+  test("Response has page number", function() {
+    expect(res.body.page).to.equal(1);
+  });
+
+  test("Response has limit", function() {
+    expect(res.body.limit).to.equal(20);
+  });
+}

@@ -1,0 +1,144 @@
+// Prisma schema for settle-processing orchestration service
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/settle-processing-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("SETTLE_PROCESSING_DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum RunStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  BLOCKED
+  RETRYING
+}
+
+enum StageType {
+  INGEST
+  CALC
+  SETTLEMENT
+}
+
+enum StageStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  BLOCKED
+  SKIPPED
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+
+/// Represents a single end-to-end settlement pipeline run triggered by a file upload.
+model PipelineRun {
+  id              String    @id @default(uuid())
+  /// Original batch ID assigned at upload time. Never changes across retries.
+  batchId         String    @unique
+  /// The active execution reference. On first run equals batchId; on retry equals the latest retryId.
+  executionRef    String
+  /// Ordered list of retry attempts linked to this run.
+  retries         RetryAttempt[]
+  status          RunStatus @default(PENDING)
+  stages          PipelineStage[]
+  /// Name / key of the uploaded file.
+  fileName        String
+  /// S3 key where the file is stored.
+  s3Key           String
+  /// S3 bucket name.
+  s3Bucket        String
+  /// Arbitrary metadata attached at upload time.
+  metadata        Json?
+  /// Structured error payload from the most recent failure.
+  errorPayload    Json?
+  startedAt       DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([executionRef])
+  @@map("pipeline_runs")
+}
+
+/// Records a single retry attempt on a PipelineRun.
+model RetryAttempt {
+  id            String      @id @default(uuid())
+  /// The new unique identifier generated for this retry.
+  retryId       String      @unique
+  /// Execution reference used for this attempt (the retryId of this attempt).
+  executionRef  String
+  /// The execution reference that was active immediately before this retry (prior batchId or retryId).
+  priorRef      String
+  run           PipelineRun @relation(fields: [runId], references: [id])
+  runId         String
+  attemptNumber Int
+  status        RunStatus   @default(RETRYING)
+  stages        PipelineStage[]
+  errorPayload  Json?
+  startedAt     DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([runId])
+  @@index([retryId])
+  @@map("retry_attempts")
+}
+
+/// Represents a single stage within a pipeline run or retry attempt.
+model PipelineStage {
+  id             String        @id @default(uuid())
+  stageType      StageType
+  status         StageStatus   @default(PENDING)
+  /// The execution reference active when this stage was created.
+  executionRef   String
+  run            PipelineRun   @relation(fields: [runId], references: [id])
+  runId          String
+  retryAttempt   RetryAttempt? @relation(fields: [retryAttemptId], references: [id])
+  retryAttemptId String?
+  /// SQS message ID if applicable.
+  sqsMessageId   String?
+  /// Structured error payload for this specific stage failure.
+  errorPayload   Json?
+  /// Arbitrary event/audit metadata.
+  metadata       Json?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([runId])
+  @@index([status])
+  @@index([stageType])
+  @@index([executionRef])
+  @@map("pipeline_stages")
+}
+
+/// Audit log: every state transition for a run or stage is appended here.
+model StateTransitionLog {
+  id            String    @id @default(uuid())
+  /// The entity type: 'run' | 'stage' | 'retry'
+  entityType    String
+  entityId      String
+  executionRef  String
+  fromStatus    String?
+  toStatus      String
+  reason        String?
+  errorPayload  Json?
+  createdAt     DateTime  @default(now())
+
+  @@index([entityId])
+  @@index([executionRef])
+  @@index([createdAt])
+  @@map("state_transition_logs")
+}

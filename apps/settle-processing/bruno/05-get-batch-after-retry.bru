@@ -1,0 +1,43 @@
+meta {
+  name: Get Batch After Retry (Verify Lineage)
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/settlement/batches/{{batchId}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("Status code is 200", function() {
+    expect(res.status).to.equal(200);
+  });
+
+  test("Batch executionRef has advanced to retryId", function() {
+    expect(res.body.executionRef).to.equal(bru.getVar("retryId"));
+  });
+
+  test("retries array has at least one entry", function() {
+    expect(res.body.retries).to.be.an("array");
+    expect(res.body.retries.length).to.be.at.least(1);
+  });
+
+  test("First retry has correct retryId", function() {
+    const retry = res.body.retries[0];
+    expect(retry.retryId).to.be.a("string");
+  });
+
+  test("Retry priorRef links back to original batchId", function() {
+    const retry = res.body.retries[0];
+    expect(retry.priorRef).to.equal(bru.getVar("batchId"));
+  });
+
+  test("Timeline includes both initial and retry stages", function() {
+    const hasInitial = res.body.timeline.some(t => t.phase === "initial");
+    const hasRetry = res.body.timeline.some(t => t.phase.startsWith("retry-"));
+    expect(hasInitial).to.be.true;
+    expect(hasRetry).to.be.true;
+  });
+}

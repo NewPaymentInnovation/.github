@@ -1,0 +1,71 @@
+{
+  "name": "settle-processing",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/settle-processing/src",
+  "projectType": "application",
+  "tags": ["scope:settle", "type:app"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/settle-processing",
+        "main": "apps/settle-processing/src/main.ts",
+        "tsConfig": "apps/settle-processing/tsconfig.json",
+        "assets": ["apps/settle-processing/src/assets"]
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "settle-processing:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "settle-processing:build:development"
+        },
+        "production": {
+          "buildTarget": "settle-processing:build:production"
+        }
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/apps/settle-processing"],
+      "options": {
+        "jestConfig": "apps/settle-processing/package.json",
+        "passWithNoTests": true,
+        "coverageReporters": ["lcov", "text"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/settle-processing/**/*.ts"]
+      }
+    },
+    "prisma-generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx prisma generate --schema=./prisma/schema.prisma",
+        "cwd": "apps/settle-processing"
+      }
+    },
+    "prisma-migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx prisma migrate dev --schema=./prisma/schema.prisma",
+        "cwd": "apps/settle-processing"
+      }
+    },
+    "prisma-migrate-prod": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx prisma migrate deploy --schema=./prisma/schema.prisma",
+        "cwd": "apps/settle-processing"
+      }
+    }
+  }
+}

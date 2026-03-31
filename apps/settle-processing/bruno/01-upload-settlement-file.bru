@@ -1,0 +1,52 @@
+meta {
+  name: Upload Settlement File
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/settlement/upload
+  body: multipartForm
+  auth: none
+}
+
+body:multipart-form {
+  file: @file(./test-fixtures/settlement-sample.csv)
+  metadata: {"source":"bruno-test","operator":"qa-tester"}
+}
+
+script:post-response {
+  if (res.status === 201) {
+    bru.setVar("batchId", res.body.batchId);
+    bru.setVar("runId", res.body.runId);
+    console.log("Batch ID set:", res.body.batchId);
+    console.log("Run ID set:", res.body.runId);
+  }
+}
+
+tests {
+  test("Status code is 201", function() {
+    expect(res.status).to.equal(201);
+  });
+
+  test("Response has batchId", function() {
+    expect(res.body.batchId).to.be.a("string");
+    expect(res.body.batchId).to.have.lengthOf.above(0);
+  });
+
+  test("executionRef equals batchId on first upload", function() {
+    expect(res.body.executionRef).to.equal(res.body.batchId);
+  });
+
+  test("Response has runId", function() {
+    expect(res.body.runId).to.be.a("string");
+  });
+
+  test("Status is PENDING or PROCESSING", function() {
+    expect(["PENDING", "PROCESSING"]).to.include(res.body.status);
+  });
+
+  test("Response has fileName", function() {
+    expect(res.body.fileName).to.equal("settlement-sample.csv");
+  });
+}

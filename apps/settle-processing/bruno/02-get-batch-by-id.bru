@@ -1,0 +1,43 @@
+meta {
+  name: Get Batch By ID
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/settlement/batches/{{batchId}}
+  body: none
+  auth: none
+}
+
+tests {
+  test("Status code is 200", function() {
+    expect(res.status).to.equal(200);
+  });
+
+  test("Response has correct batchId", function() {
+    expect(res.body.batchId).to.equal(bru.getVar("batchId"));
+  });
+
+  test("Response includes stages array", function() {
+    expect(res.body.stages).to.be.an("array");
+    expect(res.body.stages.length).to.be.above(0);
+  });
+
+  test("Response includes retries array", function() {
+    expect(res.body.retries).to.be.an("array");
+  });
+
+  test("Response includes timeline", function() {
+    expect(res.body.timeline).to.be.an("array");
+  });
+
+  test("Response has executionRef", function() {
+    expect(res.body.executionRef).to.be.a("string");
+  });
+
+  test("Response has status field", function() {
+    const validStatuses = ["PENDING", "PROCESSING", "COMPLETED", "FAILED", "BLOCKED", "RETRYING"];
+    expect(validStatuses).to.include(res.body.status);
+  });
+}
