@@ -1,11 +1,11 @@
 <p align="center">
-<a href="https://npi.ie">
-  <img src="https://i0.wp.com/npi.ie/wp-content/uploads/2022/08/NPI-Logo-2019_Full.png?resize=300%2C130&ssl=1" alt="Website">
+<a href="https://infinitpay.tech">
+  <img src="https://i0.wp.com/infinitepay.tech/wp-content/uploads/2026/01/infinite-logo-2026.png?resize=300%2C130&ssl=1" alt="Website">
 </a>
 
-# New Payment Innovation
+# Infinite Payment Technology
 
-At New Payment Innovation our mission is to develop cutting edge technology to power future innovation in payments.
+At Infinite Payment Technology our mission is to develop cutting edge technology to power future innovation in payments.
 
 <!--
 
