@@ -1,6 +1,6 @@
 <p align="center">
 <a href="https://infinitpay.tech">
-  <img src="https://i0.wp.com/infinitepay.tech/wp-content/uploads/2026/01/infinite-logo-2026.png?resize=300%2C130&ssl=1" alt="Website">
+  <img src="https://i0.wp.com/infinitepay.tech/wp-content/uploads/2026/01/infinite-logo-2026.png?resize=1024%2C123&ssl=1" alt="Website">
 </a>
 
 # Infinite Payment Technology
